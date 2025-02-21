@@ -1,12 +1,31 @@
 // Wait for the DOM to be fully loaded
 document.addEventListener('DOMContentLoaded', function() {
-    // Get root element
     const root = document.getElementById('root');
-    
-    // Get stored jobs or initialize empty array
     let jobs = JSON.parse(localStorage.getItem('jobs') || '[]');
+    let cvs = JSON.parse(localStorage.getItem('cvs') || '[]');
+    let activeTab = 'jobs'; // Default tab
 
-    // Function to create the job form
+    // Function to create navigation tabs
+    function createNavigation() {
+        return `
+            <div class="nav-tabs">
+                <button 
+                    class="tab-button ${activeTab === 'jobs' ? 'active' : ''}"
+                    onclick="switchTab('jobs')"
+                >
+                    Job Applications
+                </button>
+                <button 
+                    class="tab-button ${activeTab === 'cvs' ? 'active' : ''}"
+                    onclick="switchTab('cvs')"
+                >
+                    CV Manager
+                </button>
+            </div>
+        `;
+    }
+
+    // Function to create job form
     function createJobForm() {
         return `
             <form id="jobForm" class="job-form">
@@ -57,6 +76,36 @@ document.addEventListener('DOMContentLoaded', function() {
         `;
     }
 
+    // Function to create CV form
+    function createCVForm() {
+        return `
+            <form id="cvForm" class="cv-form job-form">
+                <h2>Add New CV Version</h2>
+                <div class="form-group">
+                    <label for="cvTitle">CV Title/Version</label>
+                    <input type="text" id="cvTitle" class="input-field" placeholder="e.g., Program Director CV" required>
+                </div>
+                <div class="form-group">
+                    <label for="targetRole">Target Role</label>
+                    <input type="text" id="targetRole" class="input-field" placeholder="e.g., Program Director, Change Manager" required>
+                </div>
+                <div class="form-group">
+                    <label for="keySkills">Key Skills Highlighted</label>
+                    <textarea id="keySkills" class="input-field" rows="3" placeholder="List main skills emphasized in this version"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="cvNotes">Notes</label>
+                    <textarea id="cvNotes" class="input-field" rows="3" placeholder="Any specific changes or focus areas"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="lastUpdated">Last Updated</label>
+                    <input type="date" id="lastUpdated" class="input-field" required>
+                </div>
+                <button type="submit" class="button">Save CV Version</button>
+            </form>
+        `;
+    }
+
     // Function to create job list HTML
     function createJobList() {
         if (jobs.length === 0) {
@@ -89,27 +138,85 @@ document.addEventListener('DOMContentLoaded', function() {
         `).join('');
     }
 
+    // Function to create CV list
+    function createCVList() {
+        if (cvs.length === 0) {
+            return '<p class="no-jobs">No CV versions added yet. Add your first CV version above!</p>';
+        }
+
+        return cvs.map((cv, index) => `
+            <div class="job-card cv-card">
+                <div class="job-header">
+                    <h3>${cv.title}</h3>
+                    <span class="date-badge">Updated: ${formatDate(cv.lastUpdated)}</span>
+                </div>
+                <div class="job-details">
+                    <p><strong>Target Role:</strong> ${cv.targetRole}</p>
+                    ${cv.keySkills ? `
+                        <div class="skills-section">
+                            <strong>Key Skills:</strong>
+                            <p>${cv.keySkills}</p>
+                        </div>
+                    ` : ''}
+                    ${cv.notes ? `
+                        <div class="notes">
+                            <strong>Notes:</strong>
+                            <p>${cv.notes}</p>
+                        </div>
+                    ` : ''}
+                </div>
+                <div class="job-actions">
+                    <button onclick="editCV(${index})" class="edit-button">Edit</button>
+                    <button onclick="deleteCV(${index})" class="delete-button">Delete</button>
+                </div>
+            </div>
+        `).join('');
+    }
+
     // Format date for display
     function formatDate(dateString) {
         const options = { year: 'numeric', month: 'long', day: 'numeric' };
         return new Date(dateString).toLocaleDateString('en-GB', options);
     }
 
+    // Function to render CV manager
+    function renderCVManager() {
+        return `
+            <div class="cv-manager">
+                ${createCVForm()}
+                <div id="cvList">
+                    ${createCVList()}
+                </div>
+            </div>
+        `;
+    }
+
     // Function to render the entire app
     function renderApp() {
         root.innerHTML = `
             <div class="header">
-                <h1>Job Application Tracker</h1>
+                <h1>Job Search Manager</h1>
+                ${createNavigation()}
             </div>
             <div class="container">
-                ${createJobForm()}
-                <div id="jobsList">
-                    ${createJobList()}
-                </div>
+                ${activeTab === 'jobs' ? 
+                    `${createJobForm()}
+                    <div id="jobsList">${createJobList()}</div>` : 
+                    renderCVManager()
+                }
             </div>
         `;
 
-        // Add form submit handler
+        // Set up event listeners based on active tab
+        if (activeTab === 'jobs') {
+            setupJobFormListener();
+        } else {
+            setupCVFormListener();
+        }
+    }
+
+    // Setup job form listener
+    function setupJobFormListener() {
         document.getElementById('jobForm').addEventListener('submit', function(e) {
             e.preventDefault();
             const newJob = {
@@ -121,14 +228,37 @@ document.addEventListener('DOMContentLoaded', function() {
                 status: document.getElementById('status').value,
                 notes: document.getElementById('notes').value
             };
-            jobs.unshift(newJob); // Add to beginning of array
+            jobs.unshift(newJob);
             localStorage.setItem('jobs', JSON.stringify(jobs));
             renderApp();
-            e.target.reset(); // Clear the form
+            e.target.reset();
         });
     }
 
-    // Global edit function
+    // Setup CV form listener
+    function setupCVFormListener() {
+        document.getElementById('cvForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const newCV = {
+                title: document.getElementById('cvTitle').value,
+                targetRole: document.getElementById('targetRole').value,
+                keySkills: document.getElementById('keySkills').value,
+                notes: document.getElementById('cvNotes').value,
+                lastUpdated: document.getElementById('lastUpdated').value
+            };
+            cvs.unshift(newCV);
+            localStorage.setItem('cvs', JSON.stringify(cvs));
+            renderApp();
+            e.target.reset();
+        });
+    }
+
+    // Global functions for tab switching and job/CV management
+    window.switchTab = function(tab) {
+        activeTab = tab;
+        renderApp();
+    };
+
     window.editJob = function(index) {
         const job = jobs[index];
         document.getElementById('company').value = job.company;
@@ -139,19 +269,36 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('status').value = job.status;
         document.getElementById('notes').value = job.notes;
         
-        // Remove the job from the array
         jobs.splice(index, 1);
         localStorage.setItem('jobs', JSON.stringify(jobs));
-        
-        // Scroll to form
         document.getElementById('jobForm').scrollIntoView({ behavior: 'smooth' });
     };
 
-    // Global delete function
     window.deleteJob = function(index) {
         if (confirm('Are you sure you want to delete this job application?')) {
             jobs.splice(index, 1);
             localStorage.setItem('jobs', JSON.stringify(jobs));
+            renderApp();
+        }
+    };
+
+    window.editCV = function(index) {
+        const cv = cvs[index];
+        document.getElementById('cvTitle').value = cv.title;
+        document.getElementById('targetRole').value = cv.targetRole;
+        document.getElementById('keySkills').value = cv.keySkills;
+        document.getElementById('cvNotes').value = cv.notes;
+        document.getElementById('lastUpdated').value = cv.lastUpdated;
+        
+        cvs.splice(index, 1);
+        localStorage.setItem('cvs', JSON.stringify(cvs));
+        document.getElementById('cvForm').scrollIntoView({ behavior: 'smooth' });
+    };
+
+    window.deleteCV = function(index) {
+        if (confirm('Are you sure you want to delete this CV version?')) {
+            cvs.splice(index, 1);
+            localStorage.setItem('cvs', JSON.stringify(cvs));
             renderApp();
         }
     };
