@@ -1,3 +1,4 @@
+// Wait for the DOM to be fully loaded
 document.addEventListener('DOMContentLoaded', function() {
     const root = document.getElementById('root');
     let jobs = JSON.parse(localStorage.getItem('jobs') || '[]');
@@ -29,7 +30,58 @@ document.addEventListener('DOMContentLoaded', function() {
         `;
     }
 
-    // Enhanced CV form with file upload and folder selection
+    // Function to create job form
+    function createJobForm() {
+        return `
+            <form id="jobForm" class="job-form">
+                <h2>Add New Job Application</h2>
+                <div class="form-group">
+                    <label for="company">Company Name</label>
+                    <input type="text" placeholder="Enter company name" id="company" class="input-field" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="position">Position</label>
+                    <input type="text" placeholder="Enter job title" id="position" class="input-field" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="salary">Salary</label>
+                    <input type="text" placeholder="Expected salary" id="salary" class="input-field">
+                </div>
+
+                <div class="form-group">
+                    <label for="location">Location</label>
+                    <input type="text" placeholder="Job location" id="location" class="input-field">
+                </div>
+
+                <div class="form-group">
+                    <label for="applicationDate">Application Date</label>
+                    <input type="date" id="applicationDate" class="input-field" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="status">Status</label>
+                    <select id="status" class="input-field">
+                        <option value="Applied">Applied</option>
+                        <option value="Interview">Interview Scheduled</option>
+                        <option value="Offer">Offer Received</option>
+                        <option value="Rejected">Rejected</option>
+                        <option value="Following">Following Up</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="notes">Notes</label>
+                    <textarea id="notes" placeholder="Add any important notes or reminders" class="input-field" rows="3"></textarea>
+                </div>
+
+                <button type="submit" class="button">Save Application</button>
+            </form>
+        `;
+    }
+
+    // Function to create CV form
     function createCVForm() {
         return `
             <form id="cvForm" class="cv-form job-form">
@@ -62,16 +114,12 @@ document.addEventListener('DOMContentLoaded', function() {
                     <label for="cvNotes">Notes</label>
                     <textarea id="cvNotes" class="input-field" rows="3" placeholder="Any specific changes or focus areas"></textarea>
                 </div>
-                <div class="form-group">
-                    <label for="lastUpdated">Last Updated</label>
-                    <input type="date" id="lastUpdated" class="input-field" required>
-                </div>
                 <button type="submit" class="button">Save CV Version</button>
             </form>
         `;
     }
 
-    // Cover Letter form
+    // Function to create Cover Letter form
     function createCoverLetterForm() {
         return `
             <form id="coverLetterForm" class="cv-form job-form">
@@ -93,20 +141,48 @@ document.addEventListener('DOMContentLoaded', function() {
                     <input type="file" id="letterFile" class="input-field" accept=".docx" required>
                 </div>
                 <div class="form-group">
-                    <label for="company">Company</label>
+                    <label for="letterCompany">Company</label>
                     <input type="text" id="letterCompany" class="input-field" placeholder="Company name" required>
                 </div>
                 <div class="form-group">
                     <label for="letterNotes">Key Points</label>
                     <textarea id="letterNotes" class="input-field" rows="3" placeholder="Main points emphasized in this version"></textarea>
                 </div>
-                <div class="form-group">
-                    <label for="letterDate">Created Date</label>
-                    <input type="date" id="letterDate" class="input-field" required>
-                </div>
                 <button type="submit" class="button">Save Cover Letter</button>
             </form>
         `;
+    }
+
+    // Function to create job list HTML
+    function createJobList() {
+        if (jobs.length === 0) {
+            return '<p class="no-jobs">No jobs added yet. Add your first job application above!</p>';
+        }
+
+        return jobs.map((job, index) => `
+            <div class="job-card status-${job.status.toLowerCase()}">
+                <div class="job-header">
+                    <h3>${job.company}</h3>
+                    <span class="status-badge">${job.status}</span>
+                </div>
+                <div class="job-details">
+                    <p class="position-title">${job.position}</p>
+                    ${job.salary ? `<p class="salary"><strong>Salary:</strong> ${job.salary}</p>` : ''}
+                    ${job.location ? `<p class="location"><strong>Location:</strong> ${job.location}</p>` : ''}
+                    <p class="date"><strong>Applied:</strong> ${formatDate(job.applicationDate)}</p>
+                    ${job.notes ? `
+                        <div class="notes">
+                            <strong>Notes:</strong>
+                            <p>${job.notes}</p>
+                        </div>
+                    ` : ''}
+                </div>
+                <div class="job-actions">
+                    <button onclick="editJob(${index})" class="edit-button">Edit</button>
+                    <button onclick="deleteJob(${index})" class="delete-button">Delete</button>
+                </div>
+            </div>
+        `).join('');
     }
 
     // Function to create folder view
@@ -164,7 +240,7 @@ document.addEventListener('DOMContentLoaded', function() {
         `).join('');
     }
 
-    // Updated CV list with folder organization
+    // Function to create CV list
     function createCVList() {
         if (cvs.length === 0) {
             return '<p class="no-items">No CV versions added yet. Add your first CV version above!</p>';
@@ -172,12 +248,18 @@ document.addEventListener('DOMContentLoaded', function() {
         return createFolderView(cvs, 'cv');
     }
 
-    // Cover Letter list
+    // Function to create Cover Letter list
     function createCoverLetterList() {
         if (coverLetters.length === 0) {
             return '<p class="no-items">No cover letters added yet. Add your first cover letter above!</p>';
         }
         return createFolderView(coverLetters, 'cover-letter');
+    }
+
+    // Format date for display
+    function formatDate(dateString) {
+        const options = { year: 'numeric', month: 'long', day: 'numeric' };
+        return new Date(dateString).toLocaleDateString('en-GB', options);
     }
 
     // Function to handle file uploads
@@ -193,7 +275,27 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Setup CV form listener with file handling
+    // Setup job form listener
+    function setupJobFormListener() {
+        document.getElementById('jobForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const newJob = {
+                company: document.getElementById('company').value,
+                position: document.getElementById('position').value,
+                salary: document.getElementById('salary').value,
+                location: document.getElementById('location').value,
+                applicationDate: document.getElementById('applicationDate').value,
+                status: document.getElementById('status').value,
+                notes: document.getElementById('notes').value
+            };
+            jobs.unshift(newJob);
+            localStorage.setItem('jobs', JSON.stringify(jobs));
+            renderApp();
+            e.target.reset();
+        });
+    }
+
+    // Setup CV form listener
     function setupCVFormListener() {
         document.getElementById('cvForm').addEventListener('submit', async function(e) {
             e.preventDefault();
@@ -206,7 +308,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     targetRole: document.getElementById('targetRole').value,
                     keySkills: document.getElementById('keySkills').value,
                     notes: document.getElementById('cvNotes').value,
-                    lastUpdated: document.getElementById('lastUpdated').value,
+                    lastUpdated: new Date().toISOString().split('T')[0],
                     fileName: fileData.name,
                     fileContent: fileData.content
                 };
@@ -230,7 +332,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     folder: document.getElementById('letterFolder').value,
                     company: document.getElementById('letterCompany').value,
                     notes: document.getElementById('letterNotes').value,
-                    createdDate: document.getElementById('letterDate').value,
+                    createdDate: new Date().toISOString().split('T')[0],
                     fileName: fileData.name,
                     fileContent: fileData.content
                 };
@@ -242,7 +344,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Render the entire app
+    // Function to render the entire app
     function renderApp() {
         root.innerHTML = `
             <div class="header">
@@ -254,33 +356,4 @@ document.addEventListener('DOMContentLoaded', function() {
                     `${createJobForm()}
                     <div id="jobsList">${createJobList()}</div>` : 
                     activeTab === 'cvs' ? 
-                    `${createCVForm()}
-                    <div id="cvList">${createCVList()}</div>` :
-                    `${createCoverLetterForm()}
-                    <div id="coverLetterList">${createCoverLetterList()}</div>`
-                }
-            </div>
-        `;
-
-        // Set up appropriate event listeners
-        if (activeTab === 'jobs') {
-            setupJobFormListener();
-        } else if (activeTab === 'cvs') {
-            setupCVFormListener();
-        } else {
-            setupCoverLetterFormListener();
-        }
-    }
-
-    // Global functions
-    window.switchTab = function(tab) {
-        activeTab = tab;
-        renderApp();
-    };
-
-    // Add other existing global functions (editJob, deleteJob, etc.)
-    [Previous global functions remain the same...]
-
-    // Initial render
-    renderApp();
-});
+                    `
