@@ -66,124 +66,46 @@
 <body>
     <div id="root"></div>
 
+    <!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Same header as before -->
+</head>
+<body>
+    <div id="root"></div>
+
     <script type="text/babel">
-        const { useState } = React;
+        const { useState, useEffect } = React;
         
         const JobTracker = () => {
             const [activeTab, setActiveTab] = useState('applications');
             const [applications, setApplications] = useState([]);
+            
+            // Load data from localStorage on initial render
+            useEffect(() => {
+                const savedApplications = localStorage.getItem('jobApplications');
+                if (savedApplications) {
+                    setApplications(JSON.parse(savedApplications));
+                }
+            }, []);
+            
+            // Save data to localStorage whenever applications change
+            useEffect(() => {
+                localStorage.setItem('jobApplications', JSON.stringify(applications));
+            }, [applications]);
             
             const addApplication = () => {
                 const newApplication = {
                     id: Date.now(),
                     company: '',
                     role: '',
-                    status: 'interested'
+                    status: 'interested',
+                    dateAdded: new Date().toISOString()
                 };
                 setApplications([...applications, newApplication]);
             };
             
-            return (
-                <div>
-                    <header>
-                        <h1>Job Application Tracker</h1>
-                        <p>Keep track of your job search journey</p>
-                    </header>
-                    
-                    <div className="tab-container">
-                        <div 
-                            className={`tab ${activeTab === 'applications' ? 'active' : ''}`}
-                            onClick={() => setActiveTab('applications')}
-                        >
-                            Applications
-                        </div>
-                        <div 
-                            className={`tab ${activeTab === 'documents' ? 'active' : ''}`}
-                            onClick={() => setActiveTab('documents')}
-                        >
-                            Documents
-                        </div>
-                    </div>
-                    
-                    {activeTab === 'applications' && (
-                        <div className="application-grid">
-                            <div className="card">
-                                <h2>Add New Application</h2>
-                                <p>Click to add a new job application to your tracker.</p>
-                                <button className="btn" onClick={addApplication}>Add Application</button>
-                            </div>
-                            
-                            {applications.map(app => (
-                                <div className="card" key={app.id}>
-                                    <h3>{app.company || 'New Application'}</h3>
-                                    <input 
-                                        type="text" 
-                                        placeholder="Company name"
-                                        value={app.company}
-                                        onChange={(e) => {
-                                            const updated = applications.map(a => 
-                                                a.id === app.id ? {...a, company: e.target.value} : a
-                                            );
-                                            setApplications(updated);
-                                        }}
-                                        style={{
-                                            padding: '8px',
-                                            marginBottom: '10px',
-                                            width: '100%',
-                                            boxSizing: 'border-box'
-                                        }}
-                                    />
-                                    <input 
-                                        type="text" 
-                                        placeholder="Role"
-                                        value={app.role}
-                                        onChange={(e) => {
-                                            const updated = applications.map(a => 
-                                                a.id === app.id ? {...a, role: e.target.value} : a
-                                            );
-                                            setApplications(updated);
-                                        }}
-                                        style={{
-                                            padding: '8px',
-                                            marginBottom: '10px',
-                                            width: '100%',
-                                            boxSizing: 'border-box'
-                                        }}
-                                    />
-                                    <select 
-                                        value={app.status}
-                                        onChange={(e) => {
-                                            const updated = applications.map(a => 
-                                                a.id === app.id ? {...a, status: e.target.value} : a
-                                            );
-                                            setApplications(updated);
-                                        }}
-                                        style={{
-                                            padding: '8px',
-                                            width: '100%',
-                                            boxSizing: 'border-box'
-                                        }}
-                                    >
-                                        <option value="interested">Interested</option>
-                                        <option value="applied">Applied</option>
-                                        <option value="interviewing">Interviewing</option>
-                                        <option value="offered">Offered</option>
-                                        <option value="rejected">Rejected</option>
-                                        <option value="accepted">Accepted</option>
-                                    </select>
-                                </div>
-                            ))}
-                        </div>
-                    )}
-                    
-                    {activeTab === 'documents' && (
-                        <div className="card">
-                            <h2>Document Management</h2>
-                            <p>Upload and manage your CVs and cover letters.</p>
-                        </div>
-                    )}
-                </div>
-            );
+            // Rest of the component remains the same
         };
         
         // Render the React application
@@ -194,3 +116,4 @@
     </script>
 </body>
 </html>
+
