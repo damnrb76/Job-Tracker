@@ -1,1 +1,1 @@
-# Job-Tracker
+# Job Application Tracker
