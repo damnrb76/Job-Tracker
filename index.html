@@ -16,22 +16,35 @@
             font-family: Arial, sans-serif;
             background-color: #f0f2f5;
             margin: 0;
-            padding: 20px;
+            padding: 16px;
+            color: #333;
         }
         header {
             background: linear-gradient(to right, #7c3aed, #3b82f6);
             color: white;
-            padding: 20px;
+            padding: 16px;
             border-radius: 8px;
-            margin-bottom: 20px;
+            margin-bottom: 16px;
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        header h1 {
+            margin: 0 0 8px 0;
+            font-size: 24px;
+        }
+        header p {
+            margin: 0;
+            opacity: 0.9;
         }
         .card {
             background-color: white;
             border-radius: 8px;
-            padding: 20px;
-            margin-bottom: 15px;
+            padding: 16px;
+            margin-bottom: 12px;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            transition: box-shadow 0.2s;
+        }
+        .card:hover {
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
         }
         .btn {
             background-color: #7c3aed;
@@ -40,17 +53,32 @@
             padding: 10px 15px;
             border-radius: 5px;
             cursor: pointer;
+            font-weight: 500;
+        }
+        .btn:hover {
+            background-color: #6d28d9;
+        }
+        .btn-secondary {
+            background-color: #e5e7eb;
+            color: #4b5563;
+        }
+        .btn-secondary:hover {
+            background-color: #d1d5db;
         }
         .tab-container {
             display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
+            gap: 8px;
+            margin-bottom: 16px;
+            overflow-x: auto;
+            padding-bottom: 4px;
         }
         .tab {
-            padding: 10px 20px;
+            padding: 10px 16px;
             background-color: white;
             border-radius: 8px;
             cursor: pointer;
+            white-space: nowrap;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
         }
         .tab.active {
             background-color: #7c3aed;
@@ -58,8 +86,118 @@
         }
         .application-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 15px;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 12px;
+        }
+        .input-field {
+            padding: 8px 10px;
+            margin-bottom: 10px;
+            width: 100%;
+            border: 1px solid #d1d5db;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+        .select-field {
+            padding: 8px 10px;
+            width: 100%;
+            border: 1px solid #d1d5db;
+            border-radius: 5px;
+            background-color: white;
+            box-sizing: border-box;
+        }
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .modal-content {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            max-width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+        }
+        .status-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        .status-interested { background-color: #dbeafe; color: #1e40af; }
+        .status-applied { background-color: #fef3c7; color: #92400e; }
+        .status-interviewing { background-color: #dcfce7; color: #166534; }
+        .status-offered { background-color: #d1fae5; color: #065f46; }
+        .status-rejected { background-color: #fee2e2; color: #b91c1c; }
+        .status-accepted { background-color: #c7f7ec; color: #047857; }
+        .timeline {
+            margin-top: 16px;
+            padding-left: 20px;
+            position: relative;
+        }
+        .timeline:before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 8px;
+            bottom: 8px;
+            width: 2px;
+            background-color: #e5e7eb;
+        }
+        .timeline-item {
+            position: relative;
+            padding-bottom: 12px;
+        }
+        .timeline-item:before {
+            content: '';
+            position: absolute;
+            left: -24px;
+            top: 4px;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: #7c3aed;
+        }
+        .timeline-date {
+            font-size: 12px;
+            color: #6b7280;
+            margin-bottom: 2px;
+        }
+        .flex-between {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .document-item {
+            display: flex;
+            padding: 10px;
+            border: 1px solid #e5e7eb;
+            border-radius: 6px;
+            margin-bottom: 8px;
+            background-color: #f9fafb;
+        }
+        .document-item:hover {
+            background-color: #f3f4f6;
+        }
+        .score-bar {
+            height: 8px;
+            border-radius: 4px;
+            background-color: #e5e7eb;
+            margin-bottom: 8px;
+        }
+        .score-fill {
+            height: 100%;
+            border-radius: 4px;
+            background-color: #7c3aed;
         }
     </style>
 </head>
@@ -67,20 +205,547 @@
     <div id="root"></div>
 
     <script type="text/babel">
-        const { useState } = React;
+        const { useState, useEffect } = React;
         
+        // Main Application Component
         const JobTracker = () => {
             const [activeTab, setActiveTab] = useState('applications');
             const [applications, setApplications] = useState([]);
+            const [documents, setDocuments] = useState({ cvs: [], coverLetters: [] });
+            const [searchTerm, setSearchTerm] = useState('');
+            const [selectedApp, setSelectedApp] = useState(null);
+            const [showATSChecker, setShowATSChecker] = useState(false);
+            const [showExport, setShowExport] = useState(false);
             
+            // Load data from localStorage on initial render
+            useEffect(() => {
+                const savedApplications = localStorage.getItem('jobApplications');
+                const savedDocuments = localStorage.getItem('jobDocuments');
+                
+                if (savedApplications) {
+                    setApplications(JSON.parse(savedApplications));
+                }
+                if (savedDocuments) {
+                    setDocuments(JSON.parse(savedDocuments));
+                }
+            }, []);
+            
+            // Save data to localStorage whenever it changes
+            useEffect(() => {
+                localStorage.setItem('jobApplications', JSON.stringify(applications));
+            }, [applications]);
+            
+            useEffect(() => {
+                localStorage.setItem('jobDocuments', JSON.stringify(documents));
+            }, [documents]);
+            
+            // Add new application
             const addApplication = () => {
                 const newApplication = {
                     id: Date.now(),
                     company: '',
                     role: '',
-                    status: 'interested'
+                    status: 'interested',
+                    contactDetails: '',
+                    notes: '',
+                    dateAdded: new Date().toISOString(),
+                    followUps: [],
+                    interviews: [],
+                    documents: {
+                        cv: '',
+                        coverLetter: ''
+                    },
+                    timeline: [{
+                        date: new Date().toISOString(),
+                        type: 'created',
+                        description: 'Application created'
+                    }]
                 };
                 setApplications([...applications, newApplication]);
+                setSelectedApp(newApplication);
+            };
+            
+            // Add document
+            const addDocument = (type) => {
+                // In a real app, this would handle file uploads
+                const newDoc = {
+                    id: Date.now(),
+                    name: type === 'cv' ? 'New CV' : 'New Cover Letter',
+                    category: '',
+                    dateAdded: new Date().toISOString(),
+                    content: ''
+                };
+                
+                if (type === 'cv') {
+                    setDocuments({
+                        ...documents,
+                        cvs: [...documents.cvs, newDoc]
+                    });
+                } else {
+                    setDocuments({
+                        ...documents,
+                        coverLetters: [...documents.coverLetters, newDoc]
+                    });
+                }
+            };
+            
+            // Add interview to application
+            const addInterview = (appId) => {
+                const updated = applications.map(app => {
+                    if (app.id === appId) {
+                        return {
+                            ...app,
+                            interviews: [...app.interviews, {
+                                id: Date.now(),
+                                date: '',
+                                type: 'initial',
+                                notes: '',
+                                completed: false
+                            }],
+                            timeline: [...app.timeline, {
+                                date: new Date().toISOString(),
+                                type: 'interview',
+                                description: 'Interview scheduled'
+                            }]
+                        };
+                    }
+                    return app;
+                });
+                setApplications(updated);
+            };
+            
+            // Add follow-up to application
+            const addFollowUp = (appId) => {
+                const updated = applications.map(app => {
+                    if (app.id === appId) {
+                        return {
+                            ...app,
+                            followUps: [...app.followUps, {
+                                id: Date.now(),
+                                date: new Date().toISOString(),
+                                description: '',
+                                completed: false
+                            }],
+                            timeline: [...app.timeline, {
+                                date: new Date().toISOString(),
+                                type: 'followUp',
+                                description: 'Follow-up added'
+                            }]
+                        };
+                    }
+                    return app;
+                });
+                setApplications(updated);
+            };
+            
+            // Update application status
+            const updateApplicationStatus = (appId, newStatus) => {
+                const updated = applications.map(app => {
+                    if (app.id === appId) {
+                        return {
+                            ...app,
+                            status: newStatus,
+                            timeline: [...app.timeline, {
+                                date: new Date().toISOString(),
+                                type: 'status',
+                                description: `Status changed to ${newStatus}`
+                            }]
+                        };
+                    }
+                    return app;
+                });
+                setApplications(updated);
+            };
+            
+            // Export applications
+            const exportData = (type = 'all') => {
+                let exportContent;
+                
+                if (type === 'all') {
+                    exportContent = JSON.stringify(applications, null, 2);
+                } else if (type === 'documents') {
+                    exportContent = JSON.stringify(documents, null, 2);
+                } else if (type === 'interviews') {
+                    const interviewData = applications.map(app => ({
+                        company: app.company,
+                        role: app.role,
+                        interviews: app.interviews
+                    }));
+                    exportContent = JSON.stringify(interviewData, null, 2);
+                }
+                
+                // Create blob and download
+                const blob = new Blob([exportContent], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `job-tracker-${type}-${new Date().toISOString().split('T')[0]}.json`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                setShowExport(false);
+            };
+            
+            // Filter applications based on search term
+            const filteredApplications = applications.filter(app => {
+                const matchesSearch = 
+                    (app.company || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+                    (app.role || '').toLowerCase().includes(searchTerm.toLowerCase());
+                return matchesSearch;
+            });
+            
+            // Calculate ATS score (simplified)
+            const calculateATSScore = (text) => {
+                const keywords = ['experience', 'skills', 'project', 'team', 'leadership', 
+                                  'development', 'management', 'success', 'achieve'];
+                let score = 0;
+                
+                keywords.forEach(keyword => {
+                    if (text.toLowerCase().includes(keyword)) {
+                        score += 10;
+                    }
+                });
+                
+                return Math.min(100, score);
+            };
+            
+            // Application Detail View Component
+            const ApplicationDetail = ({ application, onClose, onUpdate }) => {
+                if (!application) return null;
+                
+                return (
+                    <div className="modal-overlay" onClick={onClose}>
+                        <div className="modal-content" onClick={e => e.stopPropagation()}>
+                            <div className="flex-between">
+                                <h2 style={{ margin: '0 0 16px 0' }}>
+                                    {application.company || 'New Application'}
+                                </h2>
+                                <button onClick={onClose} className="btn btn-secondary" style={{ padding: '6px 12px' }}>
+                                    Close
+                                </button>
+                            </div>
+                            
+                            <div style={{ marginBottom: '16px' }}>
+                                <label style={{ display: 'block', marginBottom: '4px', fontWeight: '500' }}>Company</label>
+                                <input
+                                    type="text"
+                                    className="input-field"
+                                    value={application.company || ''}
+                                    onChange={(e) => {
+                                        const updated = applications.map(app =>
+                                            app.id === application.id ? { ...app, company: e.target.value } : app
+                                        );
+                                        onUpdate(updated);
+                                    }}
+                                />
+                            </div>
+                            
+                            <div style={{ marginBottom: '16px' }}>
+                                <label style={{ display: 'block', marginBottom: '4px', fontWeight: '500' }}>Role</label>
+                                <input
+                                    type="text"
+                                    className="input-field"
+                                    value={application.role || ''}
+                                    onChange={(e) => {
+                                        const updated = applications.map(app =>
+                                            app.id === application.id ? { ...app, role: e.target.value } : app
+                                        );
+                                        onUpdate(updated);
+                                    }}
+                                />
+                            </div>
+                            
+                            <div style={{ marginBottom: '16px' }}>
+                                <label style={{ display: 'block', marginBottom: '4px', fontWeight: '500' }}>Status</label>
+                                <select
+                                    className="select-field"
+                                    value={application.status}
+                                    onChange={(e) => {
+                                        updateApplicationStatus(application.id, e.target.value);
+                                    }}
+                                >
+                                    <option value="interested">Interested</option>
+                                    <option value="applied">Applied</option>
+                                    <option value="interviewing">Interviewing</option>
+                                    <option value="offered">Offered</option>
+                                    <option value="rejected">Rejected</option>
+                                    <option value="accepted">Accepted</option>
+                                </select>
+                            </div>
+                            
+                            <div style={{ marginBottom: '16px' }}>
+                                <label style={{ display: 'block', marginBottom: '4px', fontWeight: '500' }}>Contact Details</label>
+                                <textarea
+                                    className="input-field"
+                                    rows="3"
+                                    value={application.contactDetails || ''}
+                                    onChange={(e) => {
+                                        const updated = applications.map(app =>
+                                            app.id === application.id ? { ...app, contactDetails: e.target.value } : app
+                                        );
+                                        onUpdate(updated);
+                                    }}
+                                ></textarea>
+                            </div>
+                            
+                            <div style={{ marginBottom: '20px' }}>
+                                <label style={{ display: 'block', marginBottom: '4px', fontWeight: '500' }}>Notes</label>
+                                <textarea
+                                    className="input-field"
+                                    rows="3"
+                                    value={application.notes || ''}
+                                    onChange={(e) => {
+                                        const updated = applications.map(app =>
+                                            app.id === application.id ? { ...app, notes: e.target.value } : app
+                                        );
+                                        onUpdate(updated);
+                                    }}
+                                ></textarea>
+                            </div>
+                            
+                            <div style={{ marginBottom: '16px' }}>
+                                <div className="flex-between">
+                                    <h3 style={{ margin: '0 0 8px 0' }}>Interviews</h3>
+                                    <button 
+                                        onClick={() => addInterview(application.id)} 
+                                        className="btn"
+                                        style={{ padding: '6px 12px', fontSize: '14px' }}
+                                    >
+                                        Add Interview
+                                    </button>
+                                </div>
+                                
+                                {application.interviews && application.interviews.length > 0 ? (
+                                    application.interviews.map((interview, index) => (
+                                        <div key={interview.id} className="card" style={{ margin: '8px 0' }}>
+                                            <input
+                                                type="date"
+                                                className="input-field"
+                                                value={interview.date ? interview.date.split('T')[0] : ''}
+                                                onChange={(e) => {
+                                                    const updated = applications.map(app => {
+                                                        if (app.id === application.id) {
+                                                            const updatedInterviews = [...app.interviews];
+                                                            updatedInterviews[index].date = e.target.value;
+                                                            return { ...app, interviews: updatedInterviews };
+                                                        }
+                                                        return app;
+                                                    });
+                                                    onUpdate(updated);
+                                                }}
+                                            />
+                                            <select
+                                                className="select-field"
+                                                value={interview.type}
+                                                onChange={(e) => {
+                                                    const updated = applications.map(app => {
+                                                        if (app.id === application.id) {
+                                                            const updatedInterviews = [...app.interviews];
+                                                            updatedInterviews[index].type = e.target.value;
+                                                            return { ...app, interviews: updatedInterviews };
+                                                        }
+                                                        return app;
+                                                    });
+                                                    onUpdate(updated);
+                                                }}
+                                            >
+                                                <option value="initial">Initial Interview</option>
+                                                <option value="technical">Technical Interview</option>
+                                                <option value="cultural">Cultural Fit</option>
+                                                <option value="final">Final Interview</option>
+                                            </select>
+                                            <textarea
+                                                className="input-field"
+                                                placeholder="Interview notes..."
+                                                rows="2"
+                                                value={interview.notes || ''}
+                                                onChange={(e) => {
+                                                    const updated = applications.map(app => {
+                                                        if (app.id === application.id) {
+                                                            const updatedInterviews = [...app.interviews];
+                                                            updatedInterviews[index].notes = e.target.value;
+                                                            return { ...app, interviews: updatedInterviews };
+                                                        }
+                                                        return app;
+                                                    });
+                                                    onUpdate(updated);
+                                                }}
+                                            ></textarea>
+                                        </div>
+                                    ))
+                                ) : (
+                                    <p style={{ color: '#6b7280', fontSize: '14px' }}>No interviews scheduled yet.</p>
+                                )}
+                            </div>
+                            
+                            <div style={{ marginBottom: '16px' }}>
+                                <div className="flex-between">
+                                    <h3 style={{ margin: '0 0 8px 0' }}>Follow-ups</h3>
+                                    <button 
+                                        onClick={() => addFollowUp(application.id)} 
+                                        className="btn"
+                                        style={{ padding: '6px 12px', fontSize: '14px' }}
+                                    >
+                                        Add Follow-up
+                                    </button>
+                                </div>
+                                
+                                {application.followUps && application.followUps.length > 0 ? (
+                                    application.followUps.map((followUp, index) => (
+                                        <div key={followUp.id} className="card" style={{ margin: '8px 0' }}>
+                                            <input
+                                                type="date"
+                                                className="input-field"
+                                                value={followUp.date ? followUp.date.split('T')[0] : ''}
+                                                onChange={(e) => {
+                                                    const updated = applications.map(app => {
+                                                        if (app.id === application.id) {
+                                                            const updatedFollowUps = [...app.followUps];
+                                                            updatedFollowUps[index].date = e.target.value;
+                                                            return { ...app, followUps: updatedFollowUps };
+                                                        }
+                                                        return app;
+                                                    });
+                                                    onUpdate(updated);
+                                                }}
+                                            />
+                                            <textarea
+                                                className="input-field"
+                                                placeholder="Follow-up details..."
+                                                rows="2"
+                                                value={followUp.description || ''}
+                                                onChange={(e) => {
+                                                    const updated = applications.map(app => {
+                                                        if (app.id === application.id) {
+                                                            const updatedFollowUps = [...app.followUps];
+                                                            updatedFollowUps[index].description = e.target.value;
+                                                            return { ...app, followUps: updatedFollowUps };
+                                                        }
+                                                        return app;
+                                                    });
+                                                    onUpdate(updated);
+                                                }}
+                                            ></textarea>
+                                            <div style={{ display: 'flex', alignItems: 'center' }}>
+                                                <input
+                                                    type="checkbox"
+                                                    checked={followUp.completed}
+                                                    onChange={(e) => {
+                                                        const updated = applications.map(app => {
+                                                            if (app.id === application.id) {
+                                                                const updatedFollowUps = [...app.followUps];
+                                                                updatedFollowUps[index].completed = e.target.checked;
+                                                                return { ...app, followUps: updatedFollowUps };
+                                                            }
+                                                            return app;
+                                                        });
+                                                        onUpdate(updated);
+                                                    }}
+                                                    style={{ marginRight: '8px' }}
+                                                />
+                                                <span style={{ fontSize: '14px' }}>Completed</span>
+                                            </div>
+                                        </div>
+                                    ))
+                                ) : (
+                                    <p style={{ color: '#6b7280', fontSize: '14px' }}>No follow-ups added yet.</p>
+                                )}
+                            </div>
+                            
+                            <div>
+                                <h3 style={{ margin: '0 0 8px 0' }}>Timeline</h3>
+                                <div className="timeline">
+                                    {application.timeline && application.timeline.map((event, index) => (
+                                        <div key={index} className="timeline-item">
+                                            <div className="timeline-date">
+                                                {new Date(event.date).toLocaleDateString()}
+                                            </div>
+                                            <div>{event.description}</div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                );
+            };
+            
+            // ATS Checker Component
+            const ATSChecker = ({ onClose }) => {
+                const [text, setText] = useState('');
+                const score = calculateATSScore(text);
+                
+                return (
+                    <div className="modal-overlay" onClick={onClose}>
+                        <div className="modal-content" onClick={e => e.stopPropagation()}>
+                            <div className="flex-between">
+                                <h2 style={{ margin: '0 0 16px 0' }}>ATS/LPS Checker</h2>
+                                <button onClick={onClose} className="btn btn-secondary" style={{ padding: '6px 12px' }}>
+                                    Close
+                                </button>
+                            </div>
+                            
+                            <textarea
+                                className="input-field"
+                                style={{ height: '200px', marginBottom: '16px' }}
+                                placeholder="Paste your CV or cover letter content here..."
+                                value={text}
+                                onChange={(e) => setText(e.target.value)}
+                            ></textarea>
+                            
+                            <div style={{ marginBottom: '16px' }}>
+                                <div className="flex-between" style={{ marginBottom: '4px' }}>
+                                    <span>ATS Compatibility Score</span>
+                                    <span style={{ fontWeight: '600' }}>{score}%</span>
+                                </div>
+                                <div className="score-bar">
+                                    <div className="score-fill" style={{ width: `${score}%` }}></div>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <h3 style={{ margin: '0 0 8px 0', fontSize: '16px' }}>Suggestions</h3>
+                                <ul style={{ padding: '0 0 0 20px', margin: '0' }}>
+                                    <li>Use industry-specific keywords relevant to the job</li>
+                                    <li>Include quantifiable achievements and metrics</li>
+                                    <li>Avoid complex formatting and graphics</li>
+                                    <li>Use standard section headings (Experience, Skills, etc.)</li>
+                                    <li>Match keywords from the job description</li>
+                                    <li>Use a clean, simple layout</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                );
+            };
+            
+            // Export Modal Component
+            const ExportModal = ({ onClose, onExport }) => {
+                return (
+                    <div className="modal-overlay" onClick={onClose}>
+                        <div className="modal-content" onClick={e => e.stopPropagation()} style={{ maxWidth: '400px' }}>
+                            <div className="flex-between">
+                                <h2 style={{ margin: '0 0 16px 0' }}>Export Data</h2>
+                                <button onClick={onClose} className="btn btn-secondary" style={{ padding: '6px 12px' }}>
+                                    Close
+                                </button>
+                            </div>
+                            
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                <button onClick={() => onExport('all')} className="btn" style={{ textAlign: 'left', padding: '10px' }}>
+                                    All Applications
+                                </button>
+                                <button onClick={() => onExport('documents')} className="btn" style={{ textAlign: 'left', padding: '10px' }}>
+                                    Documents (CVs & Cover Letters)
+                                </button>
+                                <button onClick={() => onExport('interviews')} className="btn" style={{ textAlign: 'left', padding: '10px' }}>
+                                    Interview History
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                );
             };
             
             return (
@@ -90,107 +755,34 @@
                         <p>Keep track of your job search journey</p>
                     </header>
                     
-                    <div className="tab-container">
-                        <div 
-                            className={`tab ${activeTab === 'applications' ? 'active' : ''}`}
-                            onClick={() => setActiveTab('applications')}
-                        >
-                            Applications
-                        </div>
-                        <div 
-                            className={`tab ${activeTab === 'documents' ? 'active' : ''}`}
-                            onClick={() => setActiveTab('documents')}
-                        >
-                            Documents
-                        </div>
-                    </div>
-                    
-                    {activeTab === 'applications' && (
-                        <div className="application-grid">
-                            <div className="card">
-                                <h2>Add New Application</h2>
-                                <p>Click to add a new job application to your tracker.</p>
-                                <button className="btn" onClick={addApplication}>Add Application</button>
+                    <div style={{ marginBottom: '16px' }}>
+                        <input
+                            type="text"
+                            className="input-field"
+                            placeholder="Search applications..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            style={{ marginBottom: '12px' }}
+                        />
+                        
+                        <div className="flex-between">
+                            <div className="tab-container">
+                                <div 
+                                    className={`tab ${activeTab === 'applications' ? 'active' : ''}`}
+                                    onClick={() => setActiveTab('applications')}
+                                >
+                                    Applications
+                                </div>
+                                <div 
+                                    className={`tab ${activeTab === 'documents' ? 'active' : ''}`}
+                                    onClick={() => setActiveTab('documents')}
+                                >
+                                    Documents
+                                </div>
                             </div>
                             
-                            {applications.map(app => (
-                                <div className="card" key={app.id}>
-                                    <h3>{app.company || 'New Application'}</h3>
-                                    <input 
-                                        type="text" 
-                                        placeholder="Company name"
-                                        value={app.company}
-                                        onChange={(e) => {
-                                            const updated = applications.map(a => 
-                                                a.id === app.id ? {...a, company: e.target.value} : a
-                                            );
-                                            setApplications(updated);
-                                        }}
-                                        style={{
-                                            padding: '8px',
-                                            marginBottom: '10px',
-                                            width: '100%',
-                                            boxSizing: 'border-box'
-                                        }}
-                                    />
-                                    <input 
-                                        type="text" 
-                                        placeholder="Role"
-                                        value={app.role}
-                                        onChange={(e) => {
-                                            const updated = applications.map(a => 
-                                                a.id === app.id ? {...a, role: e.target.value} : a
-                                            );
-                                            setApplications(updated);
-                                        }}
-                                        style={{
-                                            padding: '8px',
-                                            marginBottom: '10px',
-                                            width: '100%',
-                                            boxSizing: 'border-box'
-                                        }}
-                                    />
-                                    <select 
-                                        value={app.status}
-                                        onChange={(e) => {
-                                            const updated = applications.map(a => 
-                                                a.id === app.id ? {...a, status: e.target.value} : a
-                                            );
-                                            setApplications(updated);
-                                        }}
-                                        style={{
-                                            padding: '8px',
-                                            width: '100%',
-                                            boxSizing: 'border-box'
-                                        }}
-                                    >
-                                        <option value="interested">Interested</option>
-                                        <option value="applied">Applied</option>
-                                        <option value="interviewing">Interviewing</option>
-                                        <option value="offered">Offered</option>
-                                        <option value="rejected">Rejected</option>
-                                        <option value="accepted">Accepted</option>
-                                    </select>
-                                </div>
-                            ))}
-                        </div>
-                    )}
-                    
-                    {activeTab === 'documents' && (
-                        <div className="card">
-                            <h2>Document Management</h2>
-                            <p>Upload and manage your CVs and cover letters.</p>
-                        </div>
-                    )}
-                </div>
-            );
-        };
-        
-        // Render the React application
-        ReactDOM.render(
-            <JobTracker />,
-            document.getElementById('root')
-        );
-    </script>
-</body>
-</html>
+                            <div style={{ display: 'flex', gap: '8px' }}>
+                                <button onClick={() => setShowATSChecker(true)} className="btn">
+                                    ATS Checker
+                                </button>
+                                <button onClick={() => setShowExport(true)} className="btn">
